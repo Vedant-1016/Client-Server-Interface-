@@ -2,16 +2,24 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <algorithm> // Added for std::remove
 #include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 using namespace std;
 
-vector<int> clients;          // list of connected client sockets
-mutex clientMutex;            // protects clients vector
+vector<int> clients;          
+mutex clientMutex;            
 
 void broadcastMessage(const string &msg) {
     lock_guard<mutex> lock(clientMutex);
     for (int client : clients) {
-        send(client, msg.c_str(), msg.size(), 0);
+        if (send(client, msg.c_str(), msg.size(), 0) == -1) {
+            cerr << "Failed to send message to client " << client << ".\n";
+            // Optionally, handle error, e.g., remove client from list if send fails consistently
+        }
     }
 }
 
@@ -23,11 +31,14 @@ void handleClient(int clientSocket) {
         if (bytes <= 0) {
             cout << "Client disconnected.\n";
             close(clientSocket);
+
+            // remove from list
+            lock_guard<mutex> lock(clientMutex);
+            clients.erase(remove(clients.begin(), clients.end(), clientSocket), clients.end());
             break;
         }
 
         buffer[bytes] = '\0';
-
         string message = "User says: " + string(buffer);
         cout << message << endl;
 
@@ -36,29 +47,51 @@ void handleClient(int clientSocket) {
 }
 
 int main() {
-    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
+    // CREATE SOCKET
+    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (serverSocket == -1) {
+        cerr << "Failed to create socket.\n";
+        return 1;
+    }
+
+    // SERVER ADDRESS
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(8000);
     serverAddr.sin_addr.s_addr = INADDR_ANY;
 
-    bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr));
-    listen(serverSocket, 10);
+    // BIND
+    if (bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+        cerr << "Failed to bind to port.\n";
+        close(serverSocket);
+        return 1;
+    }
+
+    // LISTEN
+    if (listen(serverSocket, 10) == -1) {
+        cerr << "Failed to listen on socket.\n";
+        close(serverSocket);
+        return 1;
+    }
 
     cout << "ConcurMeet Server running on port 8000\n";
 
     while (true) {
         int clientSocket = accept(serverSocket, NULL, NULL);
-
-        {
-            lock_guard<mutex> lock(clientMutex);
-            clients.push_back(clientSocket);
+        if (clientSocket == -1) {
+            cerr << "Failed to accept client connection.\n";
+            continue;
         }
+
+        lock_guard<mutex> lock(clientMutex);
+        clients.push_back(clientSocket);
 
         cout << "New client connected.\n";
         thread(handleClient, clientSocket).detach();
     }
 
+    // The server socket is never explicitly closed because the main loop is infinite.
+    // In a real-world scenario, you might have a mechanism to gracefully shut down.
     return 0;
 }
