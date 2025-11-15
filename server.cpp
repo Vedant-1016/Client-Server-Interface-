@@ -2,13 +2,8 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <algorithm> // Added for std::remove
 #include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
-
-// THESE 3 ARE 100% NECESSARY FOR SOCKETS ON LINUX
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -21,7 +16,10 @@ mutex clientMutex;
 void broadcastMessage(const string &msg) {
     lock_guard<mutex> lock(clientMutex);
     for (int client : clients) {
-        send(client, msg.c_str(), msg.size(), 0);
+        if (send(client, msg.c_str(), msg.size(), 0) == -1) {
+            cerr << "Failed to send message to client " << client << ".\n";
+            // Optionally, handle error, e.g., remove client from list if send fails consistently
+        }
     }
 }
 
@@ -52,6 +50,10 @@ int main() {
 
     // CREATE SOCKET
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (serverSocket == -1) {
+        cerr << "Failed to create socket.\n";
+        return 1;
+    }
 
     // SERVER ADDRESS
     sockaddr_in serverAddr;
@@ -60,15 +62,27 @@ int main() {
     serverAddr.sin_addr.s_addr = INADDR_ANY;
 
     // BIND
-    bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr));
+    if (bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+        cerr << "Failed to bind to port.\n";
+        close(serverSocket);
+        return 1;
+    }
 
     // LISTEN
-    listen(serverSocket, 10);
+    if (listen(serverSocket, 10) == -1) {
+        cerr << "Failed to listen on socket.\n";
+        close(serverSocket);
+        return 1;
+    }
 
     cout << "ConcurMeet Server running on port 8000\n";
 
     while (true) {
         int clientSocket = accept(serverSocket, NULL, NULL);
+        if (clientSocket == -1) {
+            cerr << "Failed to accept client connection.\n";
+            continue;
+        }
 
         lock_guard<mutex> lock(clientMutex);
         clients.push_back(clientSocket);
@@ -77,5 +91,7 @@ int main() {
         thread(handleClient, clientSocket).detach();
     }
 
+    // The server socket is never explicitly closed because the main loop is infinite.
+    // In a real-world scenario, you might have a mechanism to gracefully shut down.
     return 0;
 }
