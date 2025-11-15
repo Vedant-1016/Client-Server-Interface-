@@ -3,6 +3,9 @@
 #include <vector>
 #include <mutex>
 #include <unistd.h>
+#include <sys/socket.h>   // <-- REQUIRED
+#include <netinet/in.h>   // <-- REQUIRED
+#include <arpa/inet.h>    // <-- REQUIRED
 using namespace std;
 
 vector<int> clients;          // list of connected client sockets
