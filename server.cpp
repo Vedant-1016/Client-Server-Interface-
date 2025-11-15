@@ -7,11 +7,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <map> // Added for std::map
 
 using namespace std;
 
 vector<int> clients;          
 mutex clientMutex;            
+map<int, string> clientUsernames; // Map to store client usernames
 
 void broadcastMessage(const string &msg) {
     lock_guard<mutex> lock(clientMutex);
@@ -25,21 +27,42 @@ void broadcastMessage(const string &msg) {
 
 void handleClient(int clientSocket) {
     char buffer[1024];
+    string username;
+
+    // Receive username
+    int bytes = recv(clientSocket, buffer, 1024, 0);
+    if (bytes <= 0) {
+        cout << "Client disconnected during username reception.\n";
+        close(clientSocket);
+        lock_guard<mutex> lock(clientMutex);
+        clients.erase(remove(clients.begin(), clients.end(), clientSocket), clients.end());
+        return; // Exit if username not received
+    }
+    buffer[bytes] = '\0';
+    username = string(buffer);
+    {
+        lock_guard<mutex> lock(clientMutex);
+        clientUsernames[clientSocket] = username;
+    }
+    cout << "New client connected: " << username << endl;
+    broadcastMessage(username + " has joined the chat.\n");
 
     while (true) {
-        int bytes = recv(clientSocket, buffer, 1024, 0);
+        bytes = recv(clientSocket, buffer, 1024, 0);
         if (bytes <= 0) {
-            cout << "Client disconnected.\n";
+            cout << "Client " << username << " disconnected.\n";
             close(clientSocket);
 
-            // remove from list
+            // remove from list and map
             lock_guard<mutex> lock(clientMutex);
             clients.erase(remove(clients.begin(), clients.end(), clientSocket), clients.end());
+            clientUsernames.erase(clientSocket);
+            broadcastMessage(username + " has left the chat.\n");
             break;
         }
 
         buffer[bytes] = '\0';
-        string message = "User says: " + string(buffer);
+        string message = username + ": " + string(buffer);
         cout << message << endl;
 
         broadcastMessage(message);
