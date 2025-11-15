@@ -3,6 +3,10 @@
 #include <vector>
 #include <mutex>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 
 // THESE 3 ARE 100% NECESSARY FOR SOCKETS ON LINUX
 #include <sys/socket.h>
