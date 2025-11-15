@@ -45,6 +45,11 @@ int main() {
 
     cout << "Connected to ConcurMeet Server!" << endl;
 
+    string username;
+    cout << "Enter your username: ";
+    getline(cin, username);
+    send(clientSocket, username.c_str(), username.size(), 0);
+
     // create thread to receive messages
     thread recvThread(receiveMessages, clientSocket);
     recvThread.detach();
@@ -64,12 +69,7 @@ int main() {
             break; // Exit loop if sending fails
         }
     }
-
-    // Join the receive thread before closing the socket to ensure it finishes gracefully.
-    // Since recvThread is detached, we can't join it directly. Instead, we'll rely on the server
-    // disconnecting to stop the receiveMessages thread. A more robust solution would involve
-    // a shared flag or a way to signal the receiveMessages thread to stop.
-    // For now, we'll just close the socket.
+ 
     close(clientSocket);
     return 0;
 }
