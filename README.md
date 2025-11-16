@@ -10,19 +10,28 @@
   - Socket Programming (Network Programming Module)
   - Threads(POSIX THREAD:Concurrent Programming Module)
 ## Steps to Use:
-1)Compile Both client and server code in your terminal( Dont forget to use -pthread while compiling).
-2)Run the server and client in different terminals
-3)Create as many clients of your choice and give each a unique username
-4)Thats it start sharing your,ideas and thoughts with your friend
-##Functionality of server code
-##Functionality of client code
-##Future Improvements
+1)Compile Both client and server code in your terminal( Dont forget to use -pthread while compiling).  
+
+2)Run the server and client in different terminals.  
+
+3)Create as many clients of your choice and give each a unique username.  
+
+4)Thats it start sharing your,ideas and thoughts with your friend.  
+
+
+## Functionality of server code
+## Functionality of client code
+## Future Improvements
 -Private Group chatting
 -Storing History of Messages
 -Blocking/Unblocking of particular usernames
-##Authors
-1)Shrey Patel
-2)Devarshi Patel
-3)Vedant Shah
-4)Ishit Shripal
+## Authors
+1)Shrey Patel  
+
+2)Devarshi Patel  
+
+3)Vedant Shah  
+
+4)Ishit Shripal  
+
 5)Kavya Halani
