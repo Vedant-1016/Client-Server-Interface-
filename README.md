@@ -170,21 +170,21 @@ You will see:
 
 # 🚀 Future Improvements (Already Planned)
 
--   Private messaging inside rooms\
--   Admin/host controls\
--   Password-protected rooms\
--   Distributed server support\
--   Voice/video packet simulation\
+-   Private messaging inside rooms
+-   Admin/host controls
+-   Password-protected rooms
+-   Distributed server support
+-   Voice/video packet simulation
 -   User blocking/unblocking
 
 ------------------------------------------------------------------------
 
 # 👨‍💻 Authors
 
--   Shrey Patel\
--   Devarshi Patel\
--   Vedant Shah\
--   Ishit Shripal\
+-   Shrey Patel
+-   Devarshi Patel
+-   Vedant Shah
+-   Ishit Shripal
 -   Kavya Halani
 
 ------------------------------------------------------------------------
