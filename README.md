@@ -11,13 +11,13 @@ Networking concepts taught in our CSP course.
 
 This project includes:
 
--   Multi-client real-time communication\
--   Room-based meeting architecture (like Google Meet codes)\
--   Concurrent server using threads\
--   Message broadcasting\
--   Join/leave notifications\
--   Chat history saved per room using File I/O\
--   Unique usernames\
+-   Multi-client real-time communication
+-   Room-based meeting architecture (like Google Meet codes)
+-   Concurrent server using threads
+-   Message broadcasting
+-   Join/leave notifications
+-   Chat history saved per room using File I/O
+-   Unique usernames
 -   Modular, scalable system design
 
 ------------------------------------------------------------------------
@@ -25,7 +25,7 @@ This project includes:
 # 🎯 Motivation
 
 We wanted to go **beyond a simple chat application** and build something
-that resembles the structure of Google Meet's backend:\
+that resembles the structure of Google Meet's backend:-
 **rooms**, **participants**, **message passing**, **logging**,
 **multiuser synchronization**, and **networked sockets**.
 
